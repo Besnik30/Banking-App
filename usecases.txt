@@ -1,0 +1,47 @@
+1. Admin Create Tellers
+2. Admin Update Tellers
+3. Admin Delete Tellers
+
+4. Tellers Create Clients
+5. Tellers Update Clients
+6. Tellers Delete Clients
+
+
+
+7. New Bank Account Application:
+    7.a Client Can Request a Current Account (0%)
+    7.b Teller approves -> activate
+    7.c Teller disapproves -> not activated
+
+
+8. New Card Application:
+    8.a Client Requests a Debit Card
+        8.a.1 Client must have an active current account
+    8.b Client Requests a Credit Card
+        8.b.1 Client income < 500 automatic disapproval
+        8.b.2 Client income > 500
+            8.b.2.1 Teller Approves
+                8.b.2.1.1 Automatically Create Technical Account (1 tech account:1 credit card)
+                8.b.2.1.2 Teller specifies interest rate per transaction
+            8.b.2.2 Teller Disapproves
+
+
+9. New Transaction:
+
+   9.a Debit (-) = Amount has been subtracted from the account where the transaction is performed.
+       Credit (+) = Amount has been added to the account where the transaction is performed.
+   9.b Validations:
+        1. Balance Availability
+        The transaction shouldn’t be performed if there isn’t enough balance in the Current Account
+        (Debit Card), if the balance is subtracted from a TECHNICAL Account (Credit Card) the
+        transaction should be performed successfully and the account balance will result to a
+        negative value in case of insufficient funds.
+        2. Each account must be linked with at least one card.
+        3. If the transaction is performed from a Technical Account, the % of interest maintained by
+           the teller should be calculated and added to the subtracted amount.
+
+   9.c The client can only see his own accounts, cards and transactions.
+   9.d The teller can see everyone’s bank accounts and transactions.
+
+   ja 2 min se mu fik muti
+   ok

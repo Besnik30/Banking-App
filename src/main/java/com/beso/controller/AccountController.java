@@ -1,0 +1,38 @@
+package com.beso.controller;
+
+import com.beso.entity.AccountStatus;
+import com.beso.resource.AccountResource;
+import com.beso.service.AccountService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@Controller
+public class AccountController {
+
+    @Autowired
+    private AccountService accountService;
+
+    @GetMapping(value="/accounts")
+    public @ResponseBody List<AccountResource> showAccountsByStatus(@RequestParam String status){
+        return accountService.getAccountsByStatus(status);
+    }
+
+    @GetMapping(value = "/account/{accountId}")
+    public @ResponseBody AccountResource showAccountById(@PathVariable("accountId") Integer accountId){
+        return accountService.getAccountResourceById(accountId);
+    }
+
+    @GetMapping(value = "/client/{clientId}/accounts")
+    public @ResponseBody
+    List<AccountResource> showClientAccounts(@PathVariable("clientId") Integer clientId){
+        return accountService.getClientAccountResources(clientId);
+    }
+
+    @PatchMapping(value = "/account/{accountId}/status/{status}")
+    public @ResponseBody
+    AccountResource updateAccountStatus(@PathVariable("accountId") Integer accountId,@PathVariable("status") AccountStatus status){
+        return accountService.updateAccountStatus(accountId,status);
+    }
+}
