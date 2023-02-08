@@ -47,12 +47,12 @@ The client can only see his own accounts, cards and transactions.
 The teller can see everyone’s bank accounts and transactions.
 
 Technologies:
- Java 11+
+ Java 17
  Git for version control
  Maven for dependency management
- All CRUD APIs should be developed as REST APIs.
+ All CRUD APIs are developed as REST APIs.
  Spring Web
- Spring Security (Include JWT)
+ Spring Security (With JWT)
  Spring Data JPA/Hibernate
- MySQL (or any other RDBMS)
+ MySQL 
  Logging
