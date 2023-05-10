@@ -7,11 +7,13 @@ import com.beso.exception.WrongUserTypeException;
 import com.beso.repository.UserRepository;
 import com.beso.resource.UserResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
@@ -37,9 +39,14 @@ public class TellerService {
     @Autowired
     private Converter<UserResource,User> userConverter;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public UserResource createTeller(UserResource tellerResource){
         User teller=userConverter.toEntity(tellerResource);
        tellerValidationService.validateTellerInput(teller);
+       String encodedPassword=passwordEncoder.encode(teller.getPassword());
+       teller.setPassword(encodedPassword);
        User tellerSave=userRepository.save(teller);
        return userConverter.fromEntity(tellerSave);
 
@@ -53,7 +60,7 @@ public class TellerService {
         teller1.setSurname(teller.getSurname());
         teller1.setUserName(teller.getUserName());
         teller1.setUserBirthDay(teller.getUserBirthDay());
-        teller1.setPassword(teller.getPassword());
+        teller1.setPassword(passwordEncoder.encode(teller.getPassword()));
         User tellerSave=userRepository.save(teller1);
         return userConverter.fromEntity(tellerSave);
     }
@@ -84,8 +91,10 @@ public class TellerService {
         }
     }
 
-    public List<UserResource> getAllTellers(){
-        List<User> users=userRepository.showUsersByUserType((UserType.TELLER).toString());
+    public Map<String,Object> getAllTellers(Integer pageNo,Integer pageSize){
+        Pageable page= PageRequest.of(pageNo,pageSize);
+        Page<User> pagedResult =userRepository.showUsersByUserType((UserType.TELLER).toString(),page);
+        List<User>users=pagedResult.getContent();
         List<UserResource> userResources=new ArrayList<>();
         UserResource resource;
 
@@ -93,6 +102,13 @@ public class TellerService {
             resource=userConverter.fromEntity(entity);
             userResources.add(resource);
         }
-        return userResources;
+
+        Map<String,Object> result=new HashMap<>();
+        result.put("tellers: ",userResources);
+        result.put("currentPage: ",pagedResult.getNumber());
+        result.put("totalItems: ",pagedResult.getTotalElements());
+        result.put("totalPages: ",pagedResult.getTotalPages());
+
+        return result;
     }
 }

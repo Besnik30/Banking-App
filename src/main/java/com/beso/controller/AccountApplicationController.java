@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import com.beso.service.*;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class AccountApplicationController {
@@ -21,10 +22,12 @@ public class AccountApplicationController {
         return accountApplicationService.requestAccountCreation(clientId,currency);
     }
 
-    @GetMapping(value = "/account-applications")
+    @GetMapping(value = "/teller/account-applications")
     public @ResponseBody
-    List<AccountApplicationResource> getAccountApplicationsByStatus(@RequestParam String status){
-        return accountApplicationService.getApplicationsByStatus(status);
+    Map<String,Object> getAccountApplicationsByStatus(@RequestParam String status,
+                                                      @RequestParam(defaultValue = "0") int pageNo,
+                                                      @RequestParam(defaultValue = "2") int size ){
+        return accountApplicationService.getApplicationsByStatus(status,pageNo,size);
     }
 
     @GetMapping(value = "/account-application/{applicationId}")
@@ -33,7 +36,7 @@ public class AccountApplicationController {
         return accountApplicationService.getApplicationByApplicationId(applicationId);
     }
 
-    @PatchMapping(value = "/account-application/{applicationId}")
+    @PatchMapping(value = "/teller/account-application/{applicationId}")
     public @ResponseBody
     AccountApplicationResource updateAccountApplication(@PathVariable("applicationId")Integer applicationId,
                                                         @RequestParam ApplicationStatus status){

@@ -18,7 +18,8 @@ public enum ErrorMessage {
     ACCOUNT_NOT_FOUND("Account not found",418),
     CARD_NOT_FOUND("Card not found",419),
     CREDIT_CARD_APPLICATION_NOT_FOUND("Credit card application not found",420),
-    ACCOUNT_APPLICATION_NOT_FOUND("Account application not found",421);
+    ACCOUNT_APPLICATION_NOT_FOUND("Account application not found",421),
+    USERNAME_NOT_FOUND("User with this username not found",422);
 
     private String errorMessage;
     private int errorCode;

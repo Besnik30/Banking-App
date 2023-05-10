@@ -1,6 +1,8 @@
 package com.beso.repository;
 
 import com.beso.entity.CreditCardApplication;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -13,5 +15,5 @@ import java.util.List;
 public interface CreditCardApplicationRepository extends JpaRepository<CreditCardApplication,Integer> {
 
     @Query(value = "SELECT * FROM credit_card_application WHERE application_status = ?1",nativeQuery = true)
-    List<CreditCardApplication> getApplicationsByStatus(String status);
+    Page<CreditCardApplication> getApplicationsByStatus(String status, Pageable pageable);
 }

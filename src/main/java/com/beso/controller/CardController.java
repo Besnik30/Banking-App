@@ -13,7 +13,7 @@ public class CardController {
     @Autowired
     private CardService cardService;
 
-    @PostMapping(value = "/account/{accountId}/debit-card")
+    @PostMapping(value = "/client/account/{accountId}/debit-card")
     public @ResponseBody
     CardResource createDebitCard(@PathVariable("accountId") Integer accountId) {
         return cardService.createDebitCard(accountId);

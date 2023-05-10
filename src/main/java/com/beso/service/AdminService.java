@@ -8,6 +8,7 @@ import com.beso.exception.WrongUserTypeException;
 import com.beso.repository.UserRepository;
 import com.beso.resource.UserResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.Optional;
@@ -22,9 +23,25 @@ public class AdminService {
     @Autowired
     private Converter <UserResource,User> userConverter;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public UserResource getAdminById(Integer id){
         User user=userRepository.findById(id).orElseThrow(()->new UserNotFoundException());
         return userConverter.fromEntity(user);
+    }
+
+    public UserResource createAdmin(UserResource adminResource){
+        User user=userConverter.toEntity(adminResource);
+        if(user.getUserType() != UserType.ADMIN){
+            throw new WrongUserTypeException();
+        }
+        else {
+            String encodedPassword = passwordEncoder.encode(user.getPassword());
+            user.setPassword(encodedPassword);
+            User userSave=userRepository.save(user);
+            return userConverter.fromEntity(userSave);
+        }
     }
 
     public UserResource updateAdmin(Integer id, UserResource admin){
@@ -34,7 +51,8 @@ public class AdminService {
         adminEntity.setSurname(admin.getSurname());
         adminEntity.setUserBirthDay(admin.getUserBirthDay());
         adminEntity.setUserName(admin.getUserName());
-        adminEntity.setPassword(admin.getPassword());
+        String encodedPassword=passwordEncoder.encode(admin.getPassword());
+        adminEntity.setPassword(encodedPassword);
         return userConverter.fromEntity(userRepository.save(adminEntity));
     }
 

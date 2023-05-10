@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class TransactionController {
@@ -14,7 +15,7 @@ public class TransactionController {
     @Autowired
     private TransactionService transactionService;
 
-    @PostMapping(value = "/account/{accountId}/transaction")
+    @PostMapping(value = "/client/account/{accountId}/transaction")
     public @ResponseBody
     TransactionResource makeTransaction(@PathVariable("accountId") Integer accountId,
                                         @RequestParam String iban,
@@ -24,13 +25,18 @@ public class TransactionController {
 
     @GetMapping(value="/client/{clientId}/transactions")
     public @ResponseBody
-    List<TransactionResource> showClientTransactions(@PathVariable("clientId") Integer clientId){
-        return transactionService.getClientTransactions(clientId);
+    Map<String,Object> showClientTransactions(@PathVariable("clientId") Integer clientId,
+                                              @RequestParam(defaultValue = "0") int pageNo,
+                                              @RequestParam(defaultValue = "2") int size){
+        return transactionService.getClientTransactions(clientId,pageNo,size);
     }
 
-    @GetMapping(value ="/transactions")
-    public @ResponseBody List<TransactionResource> showTransactions(){
-        return transactionService.getTransactions();
+    @GetMapping(value ="/teller/transactions")
+    public
+    @ResponseBody Map<String,Object> showTransactions(@RequestParam(defaultValue = "0") int pageNo,
+                                                      @RequestParam(defaultValue = "2") int size){
+
+        return transactionService.getTransactions(pageNo,size);
     }
 
 }
