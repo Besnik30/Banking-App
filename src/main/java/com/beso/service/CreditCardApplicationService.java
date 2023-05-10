@@ -11,11 +11,12 @@ import com.beso.resource.CardResource;
 import com.beso.resource.CreditCardApplicationResource;
 import com.beso.resource.UserResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
@@ -91,8 +92,10 @@ public class CreditCardApplicationService {
         }
     }
 
-    public List<CreditCardApplicationResource> getApplicationByStatus(String status){
-        List<CreditCardApplication> applications=creditCardApplicationRepository.getApplicationsByStatus(status);
+    public Map<String,Object> getApplicationByStatus(String status,Integer pageNo,Integer pageSize){
+        Pageable page= PageRequest.of(pageNo,pageSize);
+        Page<CreditCardApplication> pagedResult =creditCardApplicationRepository.getApplicationsByStatus(status,page);
+        List<CreditCardApplication>applications=pagedResult.getContent();
         List<CreditCardApplicationResource> applicationResources=new ArrayList<>();
         CreditCardApplicationResource resource;
 
@@ -100,6 +103,13 @@ public class CreditCardApplicationService {
             resource=creditCardApplicationConverter.fromEntity(application);
             applicationResources.add(resource);
         }
-        return applicationResources;
+
+        Map<String,Object> result=new HashMap<>();
+        result.put("Applications: ",applicationResources);
+        result.put("currentPage: ",pagedResult.getNumber());
+        result.put("totalItems: ",pagedResult.getTotalElements());
+        result.put("totalPages: ",pagedResult.getTotalPages());
+
+        return result;
     }
 }

@@ -2,6 +2,7 @@ package com.beso.exception;
 
 import com.beso.service.ErrorMessage;
 import org.hibernate.PropertyValueException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -46,12 +47,12 @@ public class ApiExceptionHandler {
     public @ResponseBody ErrorMessage handlePropertyValueException(PropertyValueException exception){
         return ErrorMessage.NULL_VALUE;
     }
-
+  /*
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     public @ResponseBody ErrorMessage handleIllegalArgumentException(IllegalArgumentException exception){
         return ErrorMessage.INVALID_INPUT;
-    }
+    } */
 
     @ExceptionHandler(WrongUserTypeException.class)
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
@@ -104,5 +105,9 @@ public class ApiExceptionHandler {
         return ErrorMessage.INVALID_IBAN;
     }
 
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public @ResponseBody ErrorMessage handleUsernameNotFoundException(UsernameNotFoundException exception){
+        return ErrorMessage.USERNAME_NOT_FOUND;
+    }
 
 }

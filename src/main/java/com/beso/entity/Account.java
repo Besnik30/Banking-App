@@ -1,6 +1,7 @@
 package com.beso.entity;
 
 import javax.persistence.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Entity
 @Table(name="Account")
@@ -41,9 +42,9 @@ public class Account {
 
     public Account() {}
 
-    public Account(String iban,String currency,Integer balance,AccountType accountType,AccountStatus accountStatus,Integer interest,User user){
-        this.iban=iban;
+    public Account(String currency,Integer balance,AccountType accountType,AccountStatus accountStatus,Integer interest,User user){
         this.currency=currency;
+        this.iban=this.currency +Math.abs(ThreadLocalRandom.current().nextInt());
         this.balance=balance;
         this.accountType=accountType;
         this.interest=interest;

@@ -11,13 +11,13 @@ import com.beso.repository.CreditCardApplicationRepository;
 import com.beso.resource.AccountResource;
 import com.beso.resource.UserResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.*;
 
 @Service
 @Transactional
@@ -39,7 +39,6 @@ public class AccountService {
 
     @Autowired
     private Converter<UserResource,User> userConverter;
-
 
     public Account getAccountById(Integer id){
         return accountRepository.findById(id).orElseThrow(()->new AccountNotFoundException());
@@ -66,7 +65,6 @@ public class AccountService {
         List<AccountResource> accountResources=new ArrayList<>();
         AccountResource resource;
 
-
             for(Account entity:accounts){
                 resource=accountConverter.fromEntity(entity);
                 accountResources.add(resource);
@@ -82,8 +80,10 @@ public class AccountService {
         return accounts;
     }
 
-    public List<AccountResource> getAccountsByStatus(String status){
-        List<Account>accounts=accountRepository.findAccountsByStatus(status);
+    public Map<String,Object> getAccountsByStatus(String status,Integer pageNo,Integer pageSize){
+        Pageable paging=  PageRequest.of(pageNo,pageSize);
+        Page<Account>pagedResult=accountRepository.findAccountsByStatus(status,paging);
+        List<Account>accounts=pagedResult.getContent();
         List<AccountResource>accountResources=new ArrayList<>();
         AccountResource resource;
 
@@ -91,7 +91,14 @@ public class AccountService {
             resource=accountConverter.fromEntity(entity);
             accountResources.add(resource);
         }
-        return accountResources;
+
+        Map<String,Object> result=new HashMap<>();
+        result.put("accounts: ",accountResources);
+        result.put("currentPage: ",pagedResult.getNumber());
+        result.put("totalItems: ",pagedResult.getTotalElements());
+        result.put("totalPages: ",pagedResult.getTotalPages());
+
+        return result;
     }
 
     public void creditBalance(Account account,Integer amount){
@@ -113,14 +120,9 @@ public class AccountService {
         else{
             AccountApplication accountApplication = accountApplicationOptional.get();
             User client=clientService.getUserById(accountApplication.getClientId());
-            String iban = generateIban(accountApplication.getCurrency());
-            Account account=new Account(iban, accountApplication.getCurrency(),0, AccountType.CURRENT,AccountStatus.INACTIVE,0,client);
+            Account account=new Account(accountApplication.getCurrency(),0, AccountType.CURRENT,AccountStatus.INACTIVE,0,client);
             accountRepository.save(account);
         }
-    }
-
-    private String generateIban(String currency) {
-        return currency +Math.abs(ThreadLocalRandom.current().nextInt());
     }
 
     public Account createTechnicalAccount(Integer applicationId,Integer interest){
@@ -132,8 +134,7 @@ public class AccountService {
             CreditCardApplication creditCardApplication = creditCardApplicationOptional.get();
             creditCardApplication.setApplicationStatus(ApplicationStatus.APPROVED);
             User client=clientService.getUserById(creditCardApplication.getClientId());
-            String iban= generateIban(creditCardApplication.getCurrency());
-            Account account=new Account(iban, creditCardApplication.getCurrency(),0,AccountType.TECHNICAL,AccountStatus.ACTIVE,interest,client);
+            Account account=new Account(creditCardApplication.getCurrency(),0,AccountType.TECHNICAL,AccountStatus.ACTIVE,interest,client);
             accountRepository.save(account);
             return account;
         }

@@ -1,9 +1,13 @@
 package com.beso.entity;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name="User")
+@Component
 public class User {
 
     @Id

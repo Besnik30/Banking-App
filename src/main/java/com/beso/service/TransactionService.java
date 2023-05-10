@@ -10,10 +10,15 @@ import com.beso.repository.AccountRepository;
 import com.beso.repository.TransactionRepository;
 import com.beso.resource.TransactionResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -33,8 +38,10 @@ public class TransactionService {
     @Autowired
     private Converter<TransactionResource,Transaction> transactionConverter;
 
-    public List<TransactionResource> getTransactions(){
-        List<Transaction> transactions=transactionRepository.findAll();
+    public Map<String,Object> getTransactions(Integer pageNo,Integer pageSize){
+        Pageable page=PageRequest.of(pageNo,pageSize);
+        Page<Transaction> pagedResult=transactionRepository.findAll(page);
+        List<Transaction> transactions=pagedResult.getContent();
         List<TransactionResource> transactionResources=new ArrayList<>();
         TransactionResource resource;
 
@@ -42,11 +49,20 @@ public class TransactionService {
             resource=transactionConverter.fromEntity(entity);
             transactionResources.add(resource);
         }
-        return transactionResources;
+
+        Map<String,Object> result=new HashMap<>();
+        result.put("transactions: ",transactionResources);
+        result.put("currentPage: ",pagedResult.getNumber());
+        result.put("totalItems: ",pagedResult.getTotalElements());
+        result.put("totalPages: ",pagedResult.getTotalPages());
+
+        return result;
     }
 
-    public List<TransactionResource>getClientTransactions(Integer clientId){
-        List<Transaction> transactions=transactionRepository.showClientTransactions(clientId);
+    public Map<String ,Object>getClientTransactions(Integer clientId,Integer pageNo,Integer pageSize){
+        Pageable page= PageRequest.of(pageNo,pageSize);
+        Page<Transaction> pagedResult =transactionRepository.showClientTransactions(clientId,page);
+        List<Transaction>transactions=pagedResult.getContent();
         List<TransactionResource> transactionResources=new ArrayList<>();
         TransactionResource resource;
 
@@ -54,7 +70,14 @@ public class TransactionService {
             resource=transactionConverter.fromEntity(entity);
             transactionResources.add(resource);
         }
-        return transactionResources;
+
+        Map<String,Object> result=new HashMap<>();
+        result.put("transactions: ",transactionResources);
+        result.put("currentPage: ",pagedResult.getNumber());
+        result.put("totalItems: ",pagedResult.getTotalElements());
+        result.put("totalPages: ",pagedResult.getTotalPages());
+
+        return result;
     }
 
     public TransactionResource makeTransaction(Integer senderAccountId,String iban,Integer amount){

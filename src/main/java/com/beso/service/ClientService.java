@@ -8,11 +8,13 @@ import com.beso.exception.WrongUserTypeException;
 import com.beso.repository.UserRepository;
 import com.beso.resource.UserResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
@@ -26,9 +28,14 @@ public class ClientService {
     @Autowired
     private Converter <UserResource,User> userConverter;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public UserResource createClient(UserResource clientResource) {
         User client=userConverter.toEntity(clientResource);
         clientValidationService.validateClientInput(client);
+        String encodedPassword=passwordEncoder.encode(clientResource.getPassword());
+        client.setPassword(encodedPassword);
         User clientSave=userRepository.save(client);
         return userConverter.fromEntity(clientSave);
 
@@ -43,10 +50,9 @@ public class ClientService {
             client1.setSurname(client.getSurname());
             client1.setUserName(client.getUserName());
             client1.setUserBirthDay(client.getUserBirthDay());
-            client1.setPassword(client.getPassword());
+            client1.setPassword(passwordEncoder.encode(client.getPassword()));
             User clientSave=userRepository.save(client1);
             return userConverter.fromEntity(clientSave);
-
     }
 
     public UserResource deleteClient(Integer id) {
@@ -85,8 +91,10 @@ public class ClientService {
         }
     }
 
-    public List<UserResource> showAllClients() {
-        List<User> users=userRepository.showUsersByUserType((UserType.CLIENT).toString());
+    public Map<String,Object> showAllClients(Integer pageNo,Integer pageSize) {
+        Pageable page= PageRequest.of(pageNo,pageSize);
+        Page<User> pagedResult=userRepository.showUsersByUserType((UserType.CLIENT).toString(),page);
+        List<User>users=pagedResult.getContent();
         List<UserResource>userResources=new ArrayList<>();
         UserResource resource;
 
@@ -94,7 +102,14 @@ public class ClientService {
             resource=userConverter.fromEntity(entity);
             userResources.add(resource);
         }
-        return userResources;
+
+        Map<String,Object> result=new HashMap<>();
+        result.put("users: ",userResources);
+        result.put("currentPage: ",pagedResult.getNumber());
+        result.put("totalItems: ",pagedResult.getTotalElements());
+        result.put("totalPages: ",pagedResult.getTotalPages());
+
+        return result;
     }
 
 }

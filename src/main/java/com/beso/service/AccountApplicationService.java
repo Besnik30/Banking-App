@@ -12,11 +12,12 @@ import com.beso.repository.AccountApplicationRepository;
 import com.beso.resource.AccountApplicationResource;
 import com.beso.resource.UserResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
@@ -50,8 +51,10 @@ public class AccountApplicationService {
         }
     }
 
-    public List<AccountApplicationResource> getApplicationsByStatus(String status){
-        List<AccountApplication> accountApplications=accountApplicationRepository.showAccountApplicationsByStatus(status);
+    public Map<String,Object> getApplicationsByStatus(String status, Integer pageNo, Integer pageSize){
+        Pageable page= PageRequest.of(pageNo,pageSize);
+        Page<AccountApplication> pagedResult=accountApplicationRepository.showAccountApplicationsByStatus(status,page);
+        List<AccountApplication> accountApplications=pagedResult.getContent();
         List<AccountApplicationResource> accountApplicationResources=new ArrayList<>();
         AccountApplicationResource accountApplicationResource;
 
@@ -60,7 +63,13 @@ public class AccountApplicationService {
             accountApplicationResources.add(accountApplicationResource);
         }
 
-        return accountApplicationResources;
+        Map<String,Object> result=new HashMap<>();
+        result.put("applications: ",accountApplicationResources);
+        result.put("currentPage: ",pagedResult.getNumber());
+        result.put("totalItems: ",pagedResult.getTotalElements());
+        result.put("totalPages: ",pagedResult.getTotalPages());
+
+        return result;
     }
 
     public AccountApplicationResource getApplicationByApplicationId(Integer applicationId){
